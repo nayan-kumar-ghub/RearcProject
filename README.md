@@ -1,4 +1,4 @@
------------------*-------------------Terraform Configuration for Deploying a Node.js Application-----------------*-------------------
+----------------*------------------Terraform Configuration for Deploying a Node.js Application----------------*------------------
 
    *Overview
 
