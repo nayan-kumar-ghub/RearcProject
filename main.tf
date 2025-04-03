@@ -179,6 +179,6 @@ output "ec2_public_ip" {
 output "app_deployment_info" {
   value = join("", [
     "Your app is now deployed on instance: ", aws_instance.quest_app.id, "\n",
-    "You can now browse/validate using: http://", aws_eip.quest_eip.public_ip, ":3000"
+    "You can now browse/validate using: http://", aws_eip.quest_eip.public_ip, ":3000/"
   ])
 }

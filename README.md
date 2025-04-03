@@ -1,4 +1,4 @@
-------------------*--------------------Terraform Configuration for Deploying a Node.js Application------------------*--------------------
+-----------------*-------------------Terraform Configuration for Deploying a Node.js Application-----------------*-------------------
 
    *Overview
 
@@ -89,7 +89,7 @@ cat /home/ubuntu/deploy.log
 
 3. Verify Application Running
 Open a browser and navigate to:
-http://<EC2_PUBLIC_IP>:3000
+http://<EC2_PUBLIC_IP>:3000/
 You should see the application responding.
 --------------------------------------------------------------------------------------------------------------------------------------------
    *Cleanup
