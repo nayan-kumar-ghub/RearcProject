@@ -1,78 +1,110 @@
-# A quest in the clouds
+------------------*--------------------Terraform Configuration for Deploying a Node.js Application------------------*--------------------
 
-### Q. What is this quest?
+   *Overview
 
-It is a fun way to assess your cloud skills. It is also a good representative sample of the work we do at Rearc. Quest is a webapp made with node.js and golang.
+   This Terraform configuration automates the deployment of a Node.js application on an AWS EC2 instance. 
+   The setup includes:
 
-### Q. So what skills should I have?
-- Public cloud: AWS, GCP, Azure.
-  - More than one cloud is a "good to have" but one is a "must have".
-- General cloud concepts, especially networking.
-- Containerization, such as: Docker, containerd, kubernetes
-- IaC (Infrastructure as code). At least some Terraform preferred.
-- Linux (or other POSIX OS).
-- VCS (Version Control System). Git is highly preferred. 
-- TLS is a plus.
+>>VPC and Subnet creation
 
-### Q. What do I have to do?
-You may do all or some of the following tasks. Please read over the complete list before starting.
+>>Security group allowing only SSH (port 22) and application access on TCP port 3000.
 
-1. If you know how to use git, start a git repository (local-only is acceptable) and commit all of your work to it.
-1. Use Infrastructure as Code (IaC) to the deploy the code as specified below.
-   - Terraform is ideal, but use whatever you know, e.g. CloudFormation, CDK, Deployment Manager, etc.
-1. Deploy the app in a container in any public cloud using the services you think best solve this problem.
-   - Use `node` as the base image. Version `node:10` or later should work.
-1. Navigate to the index page to obtain the SECRET_WORD.
-1. Inject an environment variable (`SECRET_WORD`) in the Docker container using the value on the index page.
-1. Deploy a load balancer in front of the app.
-1. Add TLS (https). You may use locally-generated certs.
+>>Elastic IP allocation and association with the EC2 instance.
 
-### Q. How do I know I have solved these stages?
-Each stage can be tested as follows (where `<ip_or_host>` is the location where the app is deployed):
+>>EC2 instance with t2.micro as instance type.
 
-1. Public cloud & index page (contains the secret word) - `http(s)://<ip_or_host>[:port]/`
-1. Docker check - `http(s)://<ip_or_host>[:port]/docker`
-1. Secret Word check - `http(s)://<ip_or_host>[:port]/secret_word`
-1. Load Balancer check  - `http(s)://<ip_or_host>[:port]/loadbalanced`
-1. TLS check - `http(s)://<ip_or_host>[:port]/tls`
+>>Terraform provisioners for copying source code and executing setup scripts.
+--------------------------------------------------------------------------------------------------------------------------------------------
+   *Prerequisites
+   Before running the Terraform script, ensure you have:
 
-### Q. Do I have to do all these?
-You may do whichever, and however many, of the tasks above as you'd like. We suspect that once you start, you won't be able to stop. It's addictive. Extra credit if you are able to submit working entries for more than one cloud provider.
+>>Terraform Installed: Download and install Terraform from terraform.io.
 
-### Q. What do I have to submit?
-1. Your work assets, as one or both of the following:
-   - A link to a hosted git repository.
-   - A compressed file containing your project directory (zip, tgz, etc). Include the `.git` sub-directory if you used git.
-1. Proof of completion, as one or both of the following:
-   - Link(s) to hosted public cloud deployment(s).
-   - One or more screenshots showing, at least, the index page of the final deployment in one or more public cloud(s) you have chosen.
-1. An answer to the prompt: "Given more time, I would improve..."
-   - Discuss any shortcomings/immaturities in your solution and the reasons behind them (lack of time is a perfectly fine reason!)
-   - **This may carry as much weight as the code itself**
+>>AWS Credentials Configured: Ensure AWS credentials are set up using aws configure or environment variables.
 
-Your work assets should include:
+--------------------------------------------------------------------------------------------------------------------------------------------
+   *Deployment Instructions
 
-- IaC files, if you completed that task.
-- One or more Dockerfiles, if you completed that task.
-- A sensible README or other file(s) that contain instructions, notes, or other written documentation to help us review and assess your submission.
-  - **Note** - the more this looks like a finished solution to deliver to a customer, the better.
+1. Initialize Terraform
+   terraform init
 
-### Q. How long do I need to host my submission on public cloud(s)?
-You don't have to at all if you don't want to. You can run it in public cloud(s), grab a screenshot, then tear it all down to avoid costs.
+2. Plan the Deployment
+   terraform plan
 
-If you _want_ to host it longer for us to view it, we recommend taking a screenshot anyway and sending that along with the link. Then you can tear down the quest whenever you want and we'll still have the screenshot. We recommend waiting no longer than one week after sending us the link before tearing it down.
+3. Apply the Configuration
+   terraform apply -auto-approve
 
-### Q. What if I successfully complete all the challenges?
-We have many more for you to solve as a member of the Rearc team!
+4. Retrieve the Public IP
+   After successful execution, Terraform will output the assigned public IP address:
+   echo "Application is running at: http://$(terraform output -raw ec2_public_ip):3000"
+--------------------------------------------------------------------------------------------------------------------------------------------
+   *Terraform Resources Created
 
-### Q. What if I find a bug?
-Awesome! Tell us you found a bug along with your submission and we'll talk more!
+1. VPC
+Creates a custom VPC with a CIDR block of 10.0.0.0/16.
 
-### Q. What if I fail?
-There is no fail. Complete whatever you can and then submit your work. Doing _everything_ in the quest is not a guarantee that you will "pass" the quest, just like not doing something is not a guarantee you will "fail" the quest.
+2. Subnet
+Creates a public subnet 10.0.1.0/24 in availability zone us-east-1a.
+map_public_ip_on_launch is enabled to allow automatic public IP assignment.
 
-### Q. Can I share this quest with others?
-No. After interviewing, please change any solutions shared publicly to be private.
+3. Security Group
+Allows SSH (port 22) and Node.js application (port 3000) from all sources (0.0.0.0/0).
+Allows all outbound traffic.
 
-### Q. Do I have to spend money out of my own pocket to complete the quest?
-No. There are many possible solutions to this quest that would be zero cost to you when using [AWS](https://aws.amazon.com/free), [GCP](https://cloud.google.com/free), or [Azure](https://azure.microsoft.com/en-us/pricing/free-services).
+4. Internet Gateway & Route Table
+Creates an Internet Gateway and a route table with a default route (0.0.0.0/0).
+Associates the route table with the public subnet.
+
+5. Elastic IP & EC2 Instance
+Allocates an Elastic IP and associates it with the EC2 instance.
+Deploys an EC2 instance (t2.micro) using Ubuntu AMI (ami-084568db4383264d4).
+Attaches the security group and subnet.
+
+6. Provisioners
+Terraform provisioners are used to automate setup:
+
+a) File Provisioner
+Copies the application source code (quest_app) to /home/ubuntu/app inside the EC2 instance.
+Copies the installation script (questapp_install.sh) to /home/ubuntu/.
+
+b) Remote Exec Provisioner
+Executes commands remotely to install dependencies and start the application:
+
+   questapp_install.sh Script Details
+   This script performs the following:
+
+>>Updates package lists (apt update -y)
+>>Installs nodejs and npm
+>>Sets permissions for the application directory
+>>Installs dependencies using npm install
+>>Starts the application with nohup npm start on port 3000
+--------------------------------------------------------------------------------------------------------------------------------------------
+   *Validation & Access
+
+1. SSH into EC2 Instance
+ssh -i Quest_Key.pem ubuntu@<EC2_PUBLIC_IP>
+
+2. Check Application Logs
+cat /home/ubuntu/deploy.log
+
+3. Verify Application Running
+Open a browser and navigate to:
+http://<EC2_PUBLIC_IP>:3000
+You should see the application responding.
+--------------------------------------------------------------------------------------------------------------------------------------------
+   *Cleanup
+To destroy all created resources, run:
+terraform destroy -auto-approve
+
+This will remove the EC2 instance, Elastic IP, VPC, and all associated resources.
+
+   *Additional Notes
+
+Ensure port 3000 is exposed by the application (server.js or app.js).
+Modify the security group rules if additional ports are required.
+
+   *Conclusion
+
+This Terraform configuration automates the infrastructure setup and deployment of a Node.js application on AWS. By using Terraform provisioners, the application is copied, installed, and executed seamlessly upon instance creation.
+
+Author: Nayan Kumar

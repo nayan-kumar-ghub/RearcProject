@@ -1,0 +1,32 @@
+# Ignore Terraform state files (contains sensitive data)
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
+
+# Ignore Terraform crash logs
+crash.log
+
+# Ignore Terraform configuration overrides
+override.tf
+override.tf.json
+*.override.tf
+*.override.tf.json
+
+# Ignore local Terraform variables
+*.tfvars
+*.tfvars.json
+
+# Ignore Terraform execution plan files
+*.tfplan
+
+# Ignore provider cache
+.terraform/
+.terraform.lock.hcl
+
+# Ignore private SSH keys (if applicable)
+*.pem
+*.key
+
+# Ignore .pem files
+echo "Quest_Key.pem" >> .gitignore
